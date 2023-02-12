@@ -1,15 +1,45 @@
 import React, { useState, useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
 import usePersist from "../Persist"
 
 
 function Dialy(props) {
-    const [japaneseMessage, setJapaneseMessage] = useState('')
-    const [englishMessage, setEnglishMessage] = useState('') 
-    const [googleMessage, setGoogleMessage] = useState('') 
-    const [transcriptMessage, setTranscriptMessage] = useState('') 
+    const [dialy, setDialy] = usePersist("dialy", [])
+    const {state} = useLocation()
+
+    let init_date = new Date()
+    let init_title = ''
+    let init_japan = ''
+    let init_english = ''
+    let init_google = '' 
+    let init_transcript = ''
+
+    if (state != null){
+        init_title = state.title
+        init_date = state.date
+        init_japan = state.japan 
+        init_english = state.english 
+        init_google = state.google
+    }
+
+    const [date, setDate] = useState(init_date)
+    const [title, setTitle] = useState(init_title)
+    const [japaneseMessage, setJapaneseMessage] = useState(init_japan)
+    const [englishMessage, setEnglishMessage] = useState(init_english) 
+    const [googleMessage, setGoogleMessage] = useState(init_google) 
+    const [transcriptMessage, setTranscriptMessage] = useState(init_transcript) 
 
     const API_KEY = process.env.REACT_APP_DEEPL_API_KEY
     const API_URL = process.env.REACT_APP_DEEPL_API_URL
+
+
+    const doDateChange = (e) => {
+        setDate(e.target.value)
+    }
+
+    const doTitleChange = (e) => {
+        setTitle(e.target.value)
+    }
 
     const doJapaneseChange = (e) => {
         setJapaneseMessage(e.target.value)
@@ -42,16 +72,34 @@ function Dialy(props) {
         setGoogleMessage(japaneseMessage + 'を翻訳した文章')
     }
 
+    const pushSaveButton = (e) => {
+        const data = {
+            title: title,
+            date: date,
+            japan: japaneseMessage,
+            english: englishMessage,
+            google: googleMessage
+        }
+        dialy.unshift(data)
+        setDialy(dialy)
+    }
+
     const doTranscriptChange = (e) => {
         setTranscriptMessage(e.target.value)
     }
 
     return (
         <div>
-            <h1 className='display-4 text-center'>English Dialy</h1>
+            <h1 className='display-4 text-center'>TanTan English Dialy</h1>
             <div className='form-group'>
                 <label for='date'>日付:</label>
-                <input type='date' id='date' className='form-control' />
+                <input type='date' id='date' className='form-control' 
+                    onChange={doDateChange} value={date}/>
+            </div>
+            <div className='form-group'>
+                <label for='title'>タイトル:</label>
+                <input type='text' id='title' className='form-control' 
+                    onChange={doTitleChange} value={title} />
             </div>
             <div className='alert alert-primary pb-0'>
                 <div className='form-group'>
@@ -66,8 +114,8 @@ function Dialy(props) {
                 </div>
             </div>
             <div className='form-group text-center'>
-                <input type='submit' value='翻訳' onClick={pushGoogleButton2} 
-                        className='btn btn-primary btn-sm col-2 text-center'/>          
+                <input type='submit' value='翻訳' onClick={pushGoogleButton} 
+                        className='btn btn-success btn-lg'/>          
             </div>
             <div className='alert alert-warning pb-0'>
                 <div className='form-group'>
@@ -81,8 +129,8 @@ function Dialy(props) {
                 </div>
             </div>
             <div className='form-group text-center'>
-                <input type='submit' value='保存' onClick={pushGoogleButton2} 
-                        className='btn btn-success btn-sm col-2 text-center'/>          
+                <a onClick={pushSaveButton} href='/' className='btn btn-primary
+                btn-lg'>保存</a> 
             </div>
         </div>
     )
